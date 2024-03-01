@@ -1,0 +1,8 @@
+az container create --resource-group az204-projects \
+    --name weathertrackerapp \
+    --image epointacr.azurecr.io/weathertracker:latest \
+    --ports 8080 8081 \
+    --dns-name-label weatertrackerapp \
+    --location westeurope \
+    --environment-variables 'WeatherForecastApi_BaseUrl' = 'https://api.weatherapi.com/v1/' 'WeatherForecastApi_ApiKey' = 'b08e6b78350d4f7a86971753242402'
+

@@ -1,0 +1,97 @@
+﻿@using WeatherTracker.Models;
+@using WeatherTracker.Services;
+@inject IWeatherService WeatherService;
+@page "/weather"
+@rendermode InteractiveServer
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<div>
+    <label for="city">City:</label>
+    <input type="text" id="city" @bind="_city" />
+    <button @onclick="async () => await GetWeatherForecast()">Get Forecast</button> 
+</div>
+
+@if (_noResult)
+{
+    <div class="pt-3">
+        <span>
+            <i class="fas fa-exclamation-triangle text-warning"></i>
+            @_errorMessage
+        </span>
+    </div>
+}
+
+@if (_weatherforecast != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Location</th>
+                <th>Last Updated</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Wind (mph)</th>
+                <th>Pressure (mb)</th>
+                <th>Precipitation (mm)</th>
+                <th>Humidity</th>
+                <th>Cloud</th>
+                <th>Feels Like (C)</th>
+                <th>Visibility (km)</th>
+                <th>UV</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@_weatherforecast?.Location?.Name</td>
+                <td>@_weatherforecast?.Current?.LastUpdated</td>
+                <td>@_weatherforecast?.Current?.TempC</td>
+                <td>@_weatherforecast?.Current?.TempF</td>
+                <td>@_weatherforecast?.Current?.WindMph</td>
+                <td>@_weatherforecast?.Current?.PressureMb</td>
+                <td>@_weatherforecast?.Current?.PrecipMm</td>
+                <td>@_weatherforecast?.Current?.Humidity</td>
+                <td>@_weatherforecast?.Current?.Cloud</td>
+                <td>@_weatherforecast?.Current?.FeelslikeC</td>
+                <td>@_weatherforecast?.Current?.VisKm</td>
+                <td>@_weatherforecast?.Current?.Uv</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast? _weatherforecast;
+    private string? _city;
+    private bool _noResult;
+    private string _errorMessage = "";
+
+    private async Task GetWeatherForecast()
+    {
+        _weatherforecast = null;
+
+        if (string.IsNullOrWhiteSpace(_city))
+        {
+            return;
+        }
+        try
+        {
+            var result = await WeatherService.GetForecastAsync(_city);
+            if (string.IsNullOrEmpty(result?.Location?.Name))
+            {
+                _noResult = true;
+                _errorMessage = "No result found for the city.";
+                return;
+            }
+        }
+        catch(Exception ex)
+        {
+            _noResult = true;
+            _errorMessage = ex.Message;
+            return;
+        }
+        _weatherforecast = await WeatherService.GetForecastAsync(_city);
+    }
+}
